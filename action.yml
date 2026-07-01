@@ -30,16 +30,16 @@ inputs:
     description: 'GitHub token used to authenticate online audits.'
     required: false
     default: ${{ github.token }}
+  config:
+    description: 'Inline zizmor configuration (YAML) to apply.'
+    required: false
+    default: ''
   advanced-security:
     description: >
       Upload results to GitHub Advanced Security (code scanning). One of
       "true", "false", or "auto" (upload only if the repository is public).
     required: false
     default: 'auto'
-  config:
-    description: 'Inline zizmor configuration (YAML) to apply.'
-    required: false
-    default: ''
 
 outputs:
   output-file:
@@ -50,15 +50,28 @@ runs:
   using: 'composite'
   steps:
     - id: zizmor
-      uses: its-me/zizmor/audit@${{ github.action_ref }}
-      with:
-        inputs: ${{ inputs.inputs }}
-        online-audits: ${{ inputs.online-audits }}
-        persona: ${{ inputs.persona }}
-        min-severity: ${{ inputs.min-severity }}
-        min-confidence: ${{ inputs.min-confidence }}
-        token: ${{ inputs.token }}
-        config: ${{ inputs.config }}
+      shell: sh
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        INPUT_INPUTS: ${{ inputs.inputs }}
+        INPUT_ONLINE_AUDITS: ${{ inputs.online-audits }}
+        INPUT_PERSONA: ${{ inputs.persona }}
+        INPUT_MIN_SEVERITY: ${{ inputs.min-severity }}
+        INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
+        INPUT_TOKEN: ${{ inputs.token }}
+        INPUT_CONFIG: ${{ inputs.config }}
+      run: |
+        docker build -t zizmor-audit -f "$ACTION_PATH/Dockerfile" "$ACTION_PATH"
+        docker run --rm \
+          -e INPUT_INPUTS -e INPUT_ONLINE_AUDITS -e INPUT_PERSONA \
+          -e INPUT_MIN_SEVERITY -e INPUT_MIN_CONFIDENCE -e INPUT_TOKEN -e INPUT_CONFIG \
+          -e GITHUB_WORKSPACE \
+          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+          -w "$GITHUB_WORKSPACE" \
+          zizmor-audit
+        STATUS=$?
+        echo "output-file=zizmor.sarif" >> "$GITHUB_OUTPUT"
+        exit "$STATUS"
 
     - if: >-
         always() &&
