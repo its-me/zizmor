@@ -31,19 +31,19 @@ echo "::group::zizmor invocation"
 echo "zizmor $* $TARGETS"
 echo "::endgroup::"
 
-set +e
 zizmor "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
-STATUS=$?
-set -e
 
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "output-file=${SARIF_NAME}" >> "$GITHUB_OUTPUT"
 fi
 
-if [ "$STATUS" -eq 0 ]; then
+# --format sarif always exits 0, so count findings in the SARIF itself.
+FINDINGS=$(grep -c '"ruleId"' "$SARIF_PATH" || true)
+
+if [ "$FINDINGS" -eq 0 ]; then
   echo "zizmor completed with no findings. SARIF written to ${SARIF_NAME}."
-else
-  echo "zizmor found issues (exit code ${STATUS}). SARIF written to ${SARIF_NAME}."
+  exit 0
 fi
 
-exit "$STATUS"
+echo "zizmor found ${FINDINGS} finding(s). SARIF written to ${SARIF_NAME}."
+exit 1
