@@ -68,19 +68,13 @@ runs:
           }}
       run: |
         docker build -t zizmor-audit -f "$ACTION_PATH/Dockerfile" "$ACTION_PATH"
-
         set +e
         docker run --rm \
-          -e INPUT_INPUTS -e INPUT_ONLINE_AUDITS -e INPUT_PERSONA \
-          -e INPUT_MIN_SEVERITY -e INPUT_MIN_CONFIDENCE -e INPUT_TOKEN -e INPUT_CONFIG \
-          -e INPUT_FORMAT \
-          -e GITHUB_WORKSPACE \
-          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
-          -w "$GITHUB_WORKSPACE" \
-          zizmor-audit
+          -e INPUT_INPUTS -e INPUT_ONLINE_AUDITS -e INPUT_PERSONA -e INPUT_MIN_SEVERITY \
+          -e INPUT_MIN_CONFIDENCE -e INPUT_TOKEN -e INPUT_CONFIG -e INPUT_FORMAT -e GITHUB_WORKSPACE \
+          -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" zizmor-audit
         STATUS=$?
         set -e
-
         if [ "$INPUT_FORMAT" = "sarif" ]; then
           echo "output-file=zizmor.sarif" >> "$GITHUB_OUTPUT"
         fi
