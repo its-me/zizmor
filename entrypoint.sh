@@ -4,12 +4,11 @@ set -eu
 TARGETS="${INPUT_INPUTS:-.}"
 PERSONA="${INPUT_PERSONA:-regular}"
 ONLINE="${INPUT_ONLINE_AUDITS:-true}"
+FORMAT="${INPUT_FORMAT:-sarif}"
 
-SARIF_NAME="zizmor.sarif"
 WORKDIR="${GITHUB_WORKSPACE:-$(pwd)}"
-SARIF_PATH="${WORKDIR}/${SARIF_NAME}"
 
-set -- --format sarif --persona "$PERSONA"
+set -- --format "$FORMAT" --persona "$PERSONA"
 
 if [ "$ONLINE" = "true" ]; then
   if [ -n "${INPUT_TOKEN:-}" ]; then
@@ -36,6 +35,15 @@ fi
 echo "::group::zizmor invocation"
 echo "zizmor $* $TARGETS"
 echo "::endgroup::"
+
+if [ "$FORMAT" != "sarif" ]; then
+  # Non-sarif formats exit non-zero on findings, so just stream and propagate.
+  zizmor "$@" $TARGETS # shellcheck disable=SC2086
+  exit $?
+fi
+
+SARIF_NAME="zizmor.sarif"
+SARIF_PATH="${WORKDIR}/${SARIF_NAME}"
 
 zizmor "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
 
