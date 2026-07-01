@@ -33,10 +33,10 @@ jobs:
 When `advanced-security` resolves to enabled (see below), results are
 uploaded to GitHub code scanning, so they show up in the repository's
 **Security** tab as well as in the job log. When it resolves to disabled
-(e.g. a private repository left on `auto`), the action instead streams
-findings straight into the job log as inline `::warning::`/`::error::`
-annotations - no SARIF file is produced or uploaded in that case, and
-`output-file` is left unset.
+(e.g. a repository without code scanning enabled left on `auto`), the action
+instead streams findings straight into the job log as inline
+`::warning::`/`::error::` annotations - no SARIF file is produced or
+uploaded in that case, and `output-file` is left unset.
 
 > Note: zizmor exits non-zero when it finds issues, so the job will fail on
 > findings; the upload step still runs regardless, via `if: always()`.
@@ -52,7 +52,7 @@ annotations - no SARIF file is produced or uploaded in that case, and
 | `min-confidence`    | Minimum confidence to report (`unknown`…`high`).                                                           | _(unset)_              |
 | `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
 | `config`            | Inline zizmor configuration (YAML) to apply.                                                               | _(unset)_               |
-| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if the repository is public). | `auto`                  |
+| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if code scanning is enabled for the repository). | `auto`                  |
 
 ## Outputs
 
