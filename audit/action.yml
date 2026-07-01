@@ -1,0 +1,44 @@
+name: 'zizmor audit'
+description: 'Run zizmor against a set of GitHub Actions workflows/actions and emit a SARIF file.'
+author: 'Sergey Kanafyev'
+
+inputs:
+  inputs:
+    description: 'Whitespace-separated list of files or directories to audit.'
+    required: false
+    default: '.'
+  online-audits:
+    description: 'Enable online (network-backed) audits. Set to "false" to run fully offline.'
+    required: false
+    default: 'true'
+  persona:
+    description: 'Audit strictness level: regular, pedantic, or auditor.'
+    required: false
+    default: 'regular'
+  min-severity:
+    description: 'Minimum severity to report (unknown, informational, low, medium, high).'
+    required: false
+    default: ''
+  min-confidence:
+    description: 'Minimum confidence to report (unknown, low, medium, high).'
+    required: false
+    default: ''
+  token:
+    description: 'GitHub token used to authenticate online audits.'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  output-file:
+    description: 'Path (relative to the workspace) of the generated SARIF results file.'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    INPUT_INPUTS: ${{ inputs.inputs }}
+    INPUT_ONLINE_AUDITS: ${{ inputs.online-audits }}
+    INPUT_PERSONA: ${{ inputs.persona }}
+    INPUT_MIN_SEVERITY: ${{ inputs.min-severity }}
+    INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
+    INPUT_TOKEN: ${{ inputs.token }}

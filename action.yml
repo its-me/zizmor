@@ -30,18 +30,37 @@ inputs:
     description: 'GitHub token used to authenticate online audits.'
     required: false
     default: ${{ github.token }}
+  advanced-security:
+    description: >
+      Upload results to GitHub Advanced Security (code scanning). One of
+      "true", "false", or "auto" (upload only if the repository is public).
+    required: false
+    default: 'auto'
 
 outputs:
   output-file:
     description: 'Path (relative to the workspace) of the generated SARIF results file.'
+    value: ${{ steps.zizmor.outputs.output-file }}
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  env:
-    INPUT_INPUTS: ${{ inputs.inputs }}
-    INPUT_ONLINE_AUDITS: ${{ inputs.online-audits }}
-    INPUT_PERSONA: ${{ inputs.persona }}
-    INPUT_MIN_SEVERITY: ${{ inputs.min-severity }}
-    INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
-    INPUT_TOKEN: ${{ inputs.token }}
+  using: 'composite'
+  steps:
+    - id: zizmor
+      uses: ./audit
+      with:
+        inputs: ${{ inputs.inputs }}
+        online-audits: ${{ inputs.online-audits }}
+        persona: ${{ inputs.persona }}
+        min-severity: ${{ inputs.min-severity }}
+        min-confidence: ${{ inputs.min-confidence }}
+        token: ${{ inputs.token }}
+
+    - if: >-
+        always() &&
+        (
+          inputs.advanced-security == 'true' ||
+          (inputs.advanced-security == 'auto' && github.event.repository.visibility == 'public')
+        )
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ steps.zizmor.outputs.output-file }}

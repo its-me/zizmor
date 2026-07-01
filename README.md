@@ -3,10 +3,11 @@
 A GitHub Action that runs [zizmor](https://github.com/zizmorcore/zizmor), a
 static analysis tool for finding security issues in GitHub Actions workflows.
 
-This action is a Docker container action built on top of the zizmor image
-published to GHCR (`ghcr.io/its-me/zizmor`). It is designed as a drop-in
-replacement for the common cases of the upstream `zizmor-action`, while
-keeping the first version intentionally small.
+This action is a composite action built around a Docker container action
+(`audit/`) that runs zizmor on top of the image published to GHCR
+(`ghcr.io/its-me/zizmor`). It is designed as a drop-in replacement for the
+common cases of the upstream `zizmor-action`, while keeping the first version
+intentionally small.
 
 ## Usage
 
@@ -16,45 +17,36 @@ on: [push, pull_request]
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   zizmor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: its-me/zizmor@main
         with:
           inputs: .
 ```
 
-### Uploading results to code scanning (optional)
+Results are automatically uploaded to GitHub code scanning when
+`advanced-security` resolves to enabled (see below), so they show up in the
+repository's **Security** tab as well as in the job log/SARIF output.
 
-This first version produces a SARIF file but leaves the upload step to you:
-
-```yaml
-      - uses: its-me/zizmor@main
-        id: zizmor
-        with:
-          inputs: .
-      - uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: ${{ steps.zizmor.outputs.output-file }}
-```
-
-> Note: zizmor exits non-zero when it finds issues, so use `if: always()` on
-> the upload step if you want results published even when the audit fails.
+> Note: zizmor exits non-zero when it finds issues, so the job will fail on
+> findings; the upload step still runs regardless, via `if: always()`.
 
 ## Inputs
 
-| Name             | Description                                                            | Default              |
-| ---------------- | ---------------------------------------------------------------------- | -------------------- |
-| `inputs`         | Whitespace-separated list of files or directories to audit.            | `.`                  |
-| `online-audits`  | Enable online (network-backed) audits. Set `false` to run offline.    | `true`               |
-| `persona`        | Audit strictness: `regular`, `pedantic`, or `auditor`.                 | `regular`            |
-| `min-severity`   | Minimum severity to report (`unknown`…`high`).                         | _(unset)_            |
-| `min-confidence` | Minimum confidence to report (`unknown`…`high`).                       | _(unset)_            |
-| `token`          | GitHub token used to authenticate online audits.                      | `${{ github.token }}`|
+| Name                | Description                                                                                              | Default               |
+| ------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `inputs`            | Whitespace-separated list of files or directories to audit.                                                | `.`                     |
+| `online-audits`     | Enable online (network-backed) audits. Set `false` to run offline.                                         | `true`                  |
+| `persona`           | Audit strictness: `regular`, `pedantic`, or `auditor`.                                                     | `regular`               |
+| `min-severity`      | Minimum severity to report (`unknown`…`high`).                                                             | _(unset)_              |
+| `min-confidence`    | Minimum confidence to report (`unknown`…`high`).                                                           | _(unset)_              |
+| `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
+| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if the repository is public). | `auto`                  |
 
 ## Outputs
 
@@ -64,6 +56,6 @@ This first version produces a SARIF file but leaves the upload step to you:
 
 ## Not yet supported
 
-Compared to the upstream action, this first version omits: automatic SARIF
-upload (`advanced-security`), `version` pinning (use the image tag instead),
-`config`, `annotations`, `color`, and `fail-on-no-inputs`.
+Compared to the upstream action, this first version omits: `version`
+pinning (use the image tag instead), `config`, `annotations`, `color`, and
+`fail-on-no-inputs`.
