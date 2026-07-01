@@ -50,7 +50,7 @@ runs:
   using: 'composite'
   steps:
     - id: zizmor
-      uses: ./audit
+      uses: its-me/zizmor/audit@${{ github.action_ref }}
       with:
         inputs: ${{ inputs.inputs }}
         online-audits: ${{ inputs.online-audits }}
