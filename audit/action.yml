@@ -27,6 +27,10 @@ inputs:
     description: 'GitHub token used to authenticate online audits.'
     required: false
     default: ${{ github.token }}
+  config:
+    description: 'Inline zizmor configuration (YAML) to apply.'
+    required: false
+    default: ''
 
 outputs:
   output-file:
@@ -42,3 +46,4 @@ runs:
     INPUT_MIN_SEVERITY: ${{ inputs.min-severity }}
     INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
     INPUT_TOKEN: ${{ inputs.token }}
+    INPUT_CONFIG: ${{ inputs.config }}

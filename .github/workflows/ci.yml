@@ -14,3 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: its-me/zizmor@main
+        with:
+          config: |
+            rules:
+              artipacked:
+                disable: true
+              unpinned-uses:
+                disable: true

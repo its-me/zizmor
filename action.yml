@@ -36,6 +36,10 @@ inputs:
       "true", "false", or "auto" (upload only if the repository is public).
     required: false
     default: 'auto'
+  config:
+    description: 'Inline zizmor configuration (YAML) to apply.'
+    required: false
+    default: ''
 
 outputs:
   output-file:
@@ -54,6 +58,7 @@ runs:
         min-severity: ${{ inputs.min-severity }}
         min-confidence: ${{ inputs.min-confidence }}
         token: ${{ inputs.token }}
+        config: ${{ inputs.config }}
 
     - if: >-
         always() &&

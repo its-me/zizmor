@@ -27,6 +27,12 @@ if [ -n "${INPUT_MIN_CONFIDENCE:-}" ]; then
   set -- "$@" --min-confidence "$INPUT_MIN_CONFIDENCE"
 fi
 
+if [ -n "${INPUT_CONFIG:-}" ]; then
+  CONFIG_PATH="$(mktemp)"
+  printf '%s\n' "$INPUT_CONFIG" > "$CONFIG_PATH"
+  set -- "$@" --config "$CONFIG_PATH"
+fi
+
 echo "::group::zizmor invocation"
 echo "zizmor $* $TARGETS"
 echo "::endgroup::"

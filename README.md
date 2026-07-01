@@ -47,6 +47,7 @@ repository's **Security** tab as well as in the job log/SARIF output.
 | `min-confidence`    | Minimum confidence to report (`unknown`…`high`).                                                           | _(unset)_              |
 | `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
 | `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if the repository is public). | `auto`                  |
+| `config`            | Inline zizmor configuration (YAML) to apply.                                                               | _(unset)_               |
 
 ## Outputs
 
@@ -57,5 +58,5 @@ repository's **Security** tab as well as in the job log/SARIF output.
 ## Not yet supported
 
 Compared to the upstream action, this first version omits: `version`
-pinning (use the image tag instead), `config`, `annotations`, `color`, and
+pinning (use the image tag instead), `annotations`, `color`, and
 `fail-on-no-inputs`.
