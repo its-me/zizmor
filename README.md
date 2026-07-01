@@ -3,11 +3,12 @@
 A GitHub Action that runs [zizmor](https://github.com/zizmorcore/zizmor), a
 static analysis tool for finding security issues in GitHub Actions workflows.
 
-This action is a composite action built around a Docker container action
-(`audit/`) that runs zizmor on top of the image published to GHCR
-(`ghcr.io/its-me/zizmor`). It is designed as a drop-in replacement for the
-common cases of the upstream `zizmor-action`, while keeping the first version
-intentionally small.
+This action is a composite action that builds and runs a Docker image
+(based on `ghcr.io/its-me/zizmor`) directly from its own checked-out files
+(via `github.action_path`), so behavior always matches the exact version of
+the action that was invoked - regardless of which repository calls it. It is
+designed as a drop-in replacement for the common cases of the upstream
+`zizmor-action`, while keeping the first version intentionally small.
 
 ## Usage
 
@@ -29,9 +30,13 @@ jobs:
           inputs: .
 ```
 
-Results are automatically uploaded to GitHub code scanning when
-`advanced-security` resolves to enabled (see below), so they show up in the
-repository's **Security** tab as well as in the job log/SARIF output.
+When `advanced-security` resolves to enabled (see below), results are
+uploaded to GitHub code scanning, so they show up in the repository's
+**Security** tab as well as in the job log. When it resolves to disabled
+(e.g. a private repository left on `auto`), the action instead streams
+findings straight into the job log as inline `::warning::`/`::error::`
+annotations - no SARIF file is produced or uploaded in that case, and
+`output-file` is left unset.
 
 > Note: zizmor exits non-zero when it finds issues, so the job will fail on
 > findings; the upload step still runs regardless, via `if: always()`.
@@ -46,14 +51,14 @@ repository's **Security** tab as well as in the job log/SARIF output.
 | `min-severity`      | Minimum severity to report (`unknown`…`high`).                                                             | _(unset)_              |
 | `min-confidence`    | Minimum confidence to report (`unknown`…`high`).                                                           | _(unset)_              |
 | `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
-| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if the repository is public). | `auto`                  |
 | `config`            | Inline zizmor configuration (YAML) to apply.                                                               | _(unset)_               |
+| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if the repository is public). | `auto`                  |
 
 ## Outputs
 
-| Name          | Description                                              |
-| ------------- | ------------------------------------------------------- |
-| `output-file` | Path (relative to the workspace) of the SARIF results.  |
+| Name          | Description                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `output-file` | Path (relative to the workspace) of the SARIF results. Only set when `advanced-security` is active. |
 
 ## Not yet supported
 
