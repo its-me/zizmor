@@ -105,3 +105,8 @@ Compared to the upstream `zizmor-action`, this action adds:
   cost of auditing the repository twice).
 - **A single `config` input that accepts both a file path and inline
   YAML**, auto-detected, instead of requiring a path only.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for
+the full text.
