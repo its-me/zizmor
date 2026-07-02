@@ -12,6 +12,8 @@ designed as a drop-in replacement for the common cases of the upstream
 
 ## Usage
 
+### Basic usage
+
 ```yaml
 name: zizmor
 on:
@@ -51,6 +53,42 @@ uploaded in that case, and `output-file` is left unset.
 > exits non-zero for its non-SARIF output formats.
 
 [ruleset]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#set-code-scanning-merge-protection
+
+### Disable a specific rule
+
+This workflow passes inline YAML via `config` to disable the
+`unpinned-uses` rule, the same configuration this repository's own CI
+uses (see [`ci.yaml`](.github/workflows/ci.yaml)) since it intentionally
+references itself via a local path rather than a pinned `uses:` ref:
+
+```yaml
+name: zizmor
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  security-events: write
+  contents: read
+  actions: read
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: its-me/action.zizmor@v1
+        with:
+          config: |
+            rules:
+              unpinned-uses:
+                disable: true
+```
 
 ## Inputs
 
