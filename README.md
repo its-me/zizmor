@@ -51,8 +51,20 @@ uploaded in that case, and `output-file` is left unset.
 | `min-severity`      | Minimum severity to report (`unknown`…`high`).                                                             | _(unset)_              |
 | `min-confidence`    | Minimum confidence to report (`unknown`…`high`).                                                           | _(unset)_              |
 | `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
-| `config`            | Inline zizmor configuration (YAML) to apply.                                                               | _(unset)_               |
+| `config`            | Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly.                     | _(unset)_               |
 | `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if code scanning is enabled for the repository). | `auto`                  |
+
+`config` accepts either form and detects which one you gave it: if the
+value spans multiple lines it's treated as inline YAML, otherwise it's
+checked against the workspace for a matching file and used as a path if
+found, falling back to inline YAML otherwise.
+
+> [!NOTE]
+> A single-line inline config (e.g. `config: "rules: {}"`) that happens to
+> also match an existing file path in your repository will be treated as a
+> path, not inline content. This is a rare edge case, but if you hit it,
+> either rename the conflicting file or make the inline config span
+> multiple lines.
 
 ## Outputs
 

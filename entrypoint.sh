@@ -27,8 +27,27 @@ if [ -n "${INPUT_MIN_CONFIDENCE:-}" ]; then
 fi
 
 if [ -n "${INPUT_CONFIG:-}" ]; then
-  CONFIG_PATH="$(mktemp)"
-  printf '%s\n' "$INPUT_CONFIG" > "$CONFIG_PATH"
+  case "$INPUT_CONFIG" in
+    *"
+"*)
+      # Contains a newline: can't be a file path, must be inline YAML.
+      IS_PATH=false
+      ;;
+    *)
+      if [ -f "${WORKDIR}/${INPUT_CONFIG}" ] || [ -f "$INPUT_CONFIG" ]; then
+        IS_PATH=true
+      else
+        IS_PATH=false
+      fi
+      ;;
+  esac
+
+  if [ "$IS_PATH" = true ]; then
+    CONFIG_PATH="$INPUT_CONFIG"
+  else
+    CONFIG_PATH="$(mktemp)"
+    printf '%s\n' "$INPUT_CONFIG" > "$CONFIG_PATH"
+  fi
   set -- "$@" --config "$CONFIG_PATH"
 fi
 
