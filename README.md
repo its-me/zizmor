@@ -38,8 +38,14 @@ instead streams findings straight into the job log as inline
 `::warning::`/`::error::` annotations - no SARIF file is produced or
 uploaded in that case, and `output-file` is left unset.
 
-> Note: zizmor exits non-zero when it finds issues, so the job will fail on
-> findings; the upload step still runs regardless, via `if: always()`.
+> Note: `zizmor`'s SARIF output always exits `0`, even with findings - this
+> is by design, since Advanced Security mode expects findings to be
+> triaged via the Security tab rather than block the build. Use a
+> [ruleset] if you want findings to block merges. When `advanced-security`
+> resolves to disabled, the job fails on findings instead, since `zizmor`
+> exits non-zero for its non-SARIF output formats.
+
+[ruleset]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#set-code-scanning-merge-protection
 
 ## Inputs
 
