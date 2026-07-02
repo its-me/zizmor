@@ -10,6 +10,12 @@ WORKDIR="${GITHUB_WORKSPACE:-$(pwd)}"
 
 set -- --format "$FORMAT" --persona "$PERSONA"
 
+if [ "${INPUT_COLOR:-true}" = "true" ]; then
+  set -- "$@" --color=always
+else
+  set -- "$@" --color=never
+fi
+
 if [ "$ONLINE" = "true" ]; then
   if [ -n "${INPUT_TOKEN:-}" ]; then
     set -- "$@" --gh-token "$INPUT_TOKEN"
@@ -55,21 +61,28 @@ echo "::group::zizmor invocation"
 echo "zizmor $* $TARGETS"
 echo "::endgroup::"
 
+set +e
 if [ "$FORMAT" != "sarif" ]; then
   # Non-sarif formats exit non-zero on findings, so just stream and propagate.
   zizmor "$@" $TARGETS # shellcheck disable=SC2086
-  exit $?
+  STATUS=$?
+else
+  SARIF_PATH="${RUNNER_TEMP:-/tmp}/zizmor.sarif"
+
+  # --format sarif always exits 0 on findings by design: results are meant to
+  # surface via GitHub code scanning rather than fail the build.
+  zizmor "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
+  STATUS=$?
+
+  if [ -n "${GITHUB_OUTPUT:-}" ]; then
+    echo "output-file=${SARIF_PATH}" >> "$GITHUB_OUTPUT"
+  fi
 fi
+set -e
 
-SARIF_PATH="${RUNNER_TEMP:-/tmp}/zizmor.sarif"
-
-# --format sarif always exits 0 on findings by design: results are meant to
-# surface via GitHub code scanning rather than fail the build.
-zizmor "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
-STATUS=$?
-
-if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "output-file=${SARIF_PATH}" >> "$GITHUB_OUTPUT"
+if [ "$STATUS" -eq 3 ] && [ "${INPUT_FAIL_ON_NO_INPUTS:-true}" = "false" ]; then
+  echo "::warning::No inputs were collected by zizmor"
+  exit 0
 fi
 
 exit "$STATUS"

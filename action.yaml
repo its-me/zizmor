@@ -41,6 +41,20 @@ inputs:
       for the repository).
     required: false
     default: 'auto'
+  version:
+    description: 'The version of zizmor to use, e.g. "1.26.1", or "latest".'
+    required: false
+    default: 'latest'
+  color:
+    description: 'Whether zizmor should output colorized CLI output.'
+    required: false
+    default: 'true'
+  fail-on-no-inputs:
+    description: >
+      Whether the action should fail if no inputs are collected by zizmor.
+      Set to "false" to succeed (with a warning) instead.
+    required: false
+    default: 'true'
 
 outputs:
   output-file:
@@ -86,13 +100,23 @@ runs:
         INPUT_MIN_CONFIDENCE: ${{ inputs.min-confidence }}
         INPUT_TOKEN: ${{ inputs.token }}
         INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_COLOR: ${{ inputs.color }}
+        INPUT_FAIL_ON_NO_INPUTS: ${{ inputs.fail-on-no-inputs }}
+        INPUT_VERSION: ${{ inputs.version }}
         INPUT_FORMAT: ${{ steps.advanced-security.outputs.enabled == 'true' && 'sarif' || 'github' }}
       run: |
-        docker build -t zizmor-audit -f "$ACTION_PATH/Dockerfile" "$ACTION_PATH"
+        case "$INPUT_VERSION" in
+          latest) ZIZMOR_VERSION="latest" ;;
+          v*) ZIZMOR_VERSION="${INPUT_VERSION#v}" ;;
+          *) ZIZMOR_VERSION="$INPUT_VERSION" ;;
+        esac
+
+        docker build -t zizmor-audit --build-arg ZIZMOR_VERSION="$ZIZMOR_VERSION" -f "$ACTION_PATH/Dockerfile" "$ACTION_PATH"
         set +e
         docker run --rm \
           -e INPUT_INPUTS -e INPUT_ONLINE_AUDITS -e INPUT_PERSONA -e INPUT_MIN_SEVERITY \
-          -e INPUT_MIN_CONFIDENCE -e INPUT_TOKEN -e INPUT_CONFIG -e INPUT_FORMAT -e RUNNER_TEMP \
+          -e INPUT_MIN_CONFIDENCE -e INPUT_TOKEN -e INPUT_CONFIG -e INPUT_COLOR \
+          -e INPUT_FAIL_ON_NO_INPUTS -e INPUT_FORMAT -e RUNNER_TEMP \
           -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" -v "$RUNNER_TEMP:$RUNNER_TEMP" \
           -w "$GITHUB_WORKSPACE" zizmor-audit
         STATUS=$?

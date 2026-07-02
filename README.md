@@ -59,6 +59,9 @@ uploaded in that case, and `output-file` is left unset.
 | `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
 | `config`            | Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly.                     | _(unset)_               |
 | `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if code scanning is enabled for the repository). | `auto`                  |
+| `version`           | The version of zizmor to use (e.g. `1.26.1`, with or without a `v` prefix), or `latest`.                   | `latest`                |
+| `color`             | Whether zizmor should output colorized CLI output.                                                         | `true`                  |
+| `fail-on-no-inputs` | Whether the action should fail if no inputs are collected by zizmor. Set `false` to succeed (with a warning) instead. | `true`                  |
 
 `config` accepts either form and detects which one you gave it: if the
 value spans multiple lines it's treated as inline YAML, otherwise it's
@@ -80,6 +83,7 @@ found, falling back to inline YAML otherwise.
 
 ## Not yet supported
 
-Compared to the upstream action, this first version omits: `version`
-pinning (use the image tag instead), `annotations`, `color`, and
-`fail-on-no-inputs`.
+Compared to the upstream action, this first version omits `annotations`
+(the `github`-format fallback used when `advanced-security` resolves to
+disabled already emits annotations, but there's no standalone opt-in
+separate from `advanced-security`).
