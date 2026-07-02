@@ -21,15 +21,18 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
   security-events: write
+  contents: read
+  actions: read
 
 jobs:
   zizmor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: its-me/action.zizmor@main
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: its-me/action.zizmor@52c918723b0bd2be8f1d275ad85b4a0b7ee91e03 # v1.0.0
 ```
 
 When `advanced-security` resolves to enabled (see below), results are
