@@ -1,4 +1,4 @@
-name: 'zizmor'
+name: 'action.zizmor'
 description: 'Runs zizmor, a static analysis tool for finding security issues in GitHub Actions workflows.'
 author: 'Sergey Kanafyev'
 branding:
