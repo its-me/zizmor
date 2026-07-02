@@ -14,7 +14,11 @@ designed as a drop-in replacement for the common cases of the upstream
 
 ```yaml
 name: zizmor
-on: [push, pull_request]
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,8 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: its-me/zizmor@main
-        with:
-          inputs: .
 ```
 
 When `advanced-security` resolves to enabled (see below), results are
