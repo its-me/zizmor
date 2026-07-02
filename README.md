@@ -4,7 +4,9 @@ A GitHub Action that runs [zizmor](https://github.com/zizmorcore/zizmor), a
 static analysis tool for finding security issues in GitHub Actions workflows.
 
 This action is a composite action that builds and runs a Docker image
-(based on `ghcr.io/its-me/zizmor`) directly from its own checked-out files
+(based on [`ghcr.io/its-me/zizmor`](https://github.com/its-me/image.zizmor),
+which builds and publishes the images this action uses) directly from its
+own checked-out files
 (via `github.action_path`), so behavior always matches the exact version of
 the action that was invoked - regardless of which repository calls it. It is
 designed as a drop-in replacement for the common cases of the upstream
@@ -129,11 +131,13 @@ found, falling back to inline YAML otherwise.
 
 Compared to the upstream `zizmor-action`, this action adds:
 
-- **A custom container image** (`ghcr.io/its-me/zizmor`), built specifically
-  for this action. It's about a third smaller than the official image
-  (~38 MB vs ~57 MB, Alpine-based rather than Wolfi-based) while running
-  the exact same `zizmor` binary and version underneath, so pulls and
-  builds are faster with no change in audit behavior.
+- **A custom container image**
+  ([`ghcr.io/its-me/zizmor`](https://ghcr.io/its-me/zizmor),
+  built by [its-me/image.zizmor](https://github.com/its-me/image.zizmor)),
+  built specifically for this action. It's about a third smaller than the
+  official image (~38 MB vs ~57 MB, Alpine-based rather than Wolfi-based)
+  while running the exact same `zizmor` binary and version underneath, so
+  pulls and builds are faster with no change in audit behavior.
 - **`advanced-security: auto`**, which detects whether GitHub code
   scanning is actually available for the repository (via the
   code-scanning API) instead of requiring you to hardcode `true` or
