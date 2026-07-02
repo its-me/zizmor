@@ -54,18 +54,23 @@ runs:
       shell: sh
       env:
         INPUT_ADVANCED_SECURITY: ${{ inputs.advanced-security }}
-        INPUT_TOKEN: ${{ inputs.token }}
+        GH_TOKEN: ${{ inputs.token }}
       run: |
         case "$INPUT_ADVANCED_SECURITY" in
           true) ENABLED=true ;;
           false) ENABLED=false ;;
           *)
-            STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
-              -H "Authorization: Bearer $INPUT_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2026-03-10" \
-              "https://api.github.com/repos/${GITHUB_REPOSITORY}/code-scanning/alerts?per_page=1")
-            if [ "$STATUS" = "200" ]; then ENABLED=true; else ENABLED=false; fi
+            RESPONSE=$(gh api --include "repos/${GITHUB_REPOSITORY}/code-scanning/alerts?per_page=1" 2>/dev/null || true)
+            STATUS=$(printf '%s\n' "$RESPONSE" | head -n1 | awk '{print $2}')
+            # 200: code scanning is enabled and has existing alerts/analyses.
+            # 404: code scanning is enabled but no analysis has been uploaded yet
+            #      (e.g. the very first run) -- GitHub returns "no analysis found"
+            #      here, not "disabled".
+            # 403 (or anything else): Advanced Security isn't enabled.
+            case "$STATUS" in
+              200|404) ENABLED=true ;;
+              *) ENABLED=false ;;
+            esac
             ;;
         esac
         echo "enabled=$ENABLED" >> "$GITHUB_OUTPUT"
