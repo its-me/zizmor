@@ -5,10 +5,11 @@ TARGETS="${INPUT_INPUTS:-.}"
 PERSONA="${INPUT_PERSONA:-regular}"
 ONLINE="${INPUT_ONLINE_AUDITS:-true}"
 FORMAT="${INPUT_FORMAT:-sarif}"
+ANNOTATIONS="${INPUT_ANNOTATIONS:-false}"
 
 WORKDIR="${GITHUB_WORKSPACE:-$(pwd)}"
 
-set -- --format "$FORMAT" --persona "$PERSONA"
+set -- --persona "$PERSONA"
 
 if [ "${INPUT_COLOR:-true}" = "true" ]; then
   set -- "$@" --color=always
@@ -57,27 +58,47 @@ if [ -n "${INPUT_CONFIG:-}" ]; then
   set -- "$@" --config "$CONFIG_PATH"
 fi
 
-echo "::group::zizmor invocation"
-echo "zizmor $* $TARGETS"
-echo "::endgroup::"
-
 set +e
-if [ "$FORMAT" != "sarif" ]; then
-  # Non-sarif formats exit non-zero on findings, so just stream and propagate.
-  zizmor "$@" $TARGETS # shellcheck disable=SC2086
-  STATUS=$?
-else
+
+if [ "$FORMAT" = "sarif" ]; then
   SARIF_PATH="${RUNNER_TEMP:-/tmp}/zizmor.sarif"
+
+  echo "::group::zizmor invocation (sarif)"
+  echo "zizmor --format sarif $* $TARGETS"
+  echo "::endgroup::"
 
   # --format sarif always exits 0 on findings by design: results are meant to
   # surface via GitHub code scanning rather than fail the build.
-  zizmor "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
-  STATUS=$?
+  zizmor --format sarif "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
+  SARIF_STATUS=$?
 
   if [ -n "${GITHUB_OUTPUT:-}" ]; then
     echo "output-file=${SARIF_PATH}" >> "$GITHUB_OUTPUT"
   fi
+
+  if [ "$ANNOTATIONS" = "true" ]; then
+    # Run a second pass so real GitHub annotations show up in the job log
+    # alongside the SARIF upload; its exit code drives the job result since
+    # the SARIF pass above always exits 0.
+    echo "::group::zizmor invocation (github)"
+    echo "zizmor --format github $* $TARGETS"
+    echo "::endgroup::"
+
+    zizmor --format github "$@" $TARGETS # shellcheck disable=SC2086
+    STATUS=$?
+  else
+    STATUS=$SARIF_STATUS
+  fi
+else
+  echo "::group::zizmor invocation"
+  echo "zizmor --format $FORMAT $* $TARGETS"
+  echo "::endgroup::"
+
+  # Non-sarif formats exit non-zero on findings, so just stream and propagate.
+  zizmor --format "$FORMAT" "$@" $TARGETS # shellcheck disable=SC2086
+  STATUS=$?
 fi
+
 set -e
 
 if [ "$STATUS" -eq 3 ] && [ "${INPUT_FAIL_ON_NO_INPUTS:-true}" = "false" ]; then

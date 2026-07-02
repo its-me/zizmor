@@ -55,6 +55,17 @@ inputs:
       Set to "false" to succeed (with a warning) instead.
     required: false
     default: 'true'
+  annotations:
+    description: >
+      Whether to also emit GitHub annotations for findings. If
+      "advanced-security" resolves to enabled, zizmor runs a second time
+      with "--format github" so annotations appear in the job log
+      alongside the SARIF upload, and the job's pass/fail result is driven
+      by that second run instead of the (always-zero) SARIF exit code. If
+      "advanced-security" resolves to disabled, this has no effect, since
+      annotations are already the fallback output in that case.
+    required: false
+    default: 'false'
 
 outputs:
   output-file:
@@ -103,6 +114,7 @@ runs:
         INPUT_COLOR: ${{ inputs.color }}
         INPUT_FAIL_ON_NO_INPUTS: ${{ inputs.fail-on-no-inputs }}
         INPUT_VERSION: ${{ inputs.version }}
+        INPUT_ANNOTATIONS: ${{ inputs.annotations }}
         INPUT_FORMAT: ${{ steps.advanced-security.outputs.enabled == 'true' && 'sarif' || 'github' }}
       run: |
         case "$INPUT_VERSION" in
@@ -116,7 +128,7 @@ runs:
         docker run --rm \
           -e INPUT_INPUTS -e INPUT_ONLINE_AUDITS -e INPUT_PERSONA -e INPUT_MIN_SEVERITY \
           -e INPUT_MIN_CONFIDENCE -e INPUT_TOKEN -e INPUT_CONFIG -e INPUT_COLOR \
-          -e INPUT_FAIL_ON_NO_INPUTS -e INPUT_FORMAT -e RUNNER_TEMP \
+          -e INPUT_FAIL_ON_NO_INPUTS -e INPUT_ANNOTATIONS -e INPUT_FORMAT -e RUNNER_TEMP \
           -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" -v "$RUNNER_TEMP:$RUNNER_TEMP" \
           -w "$GITHUB_WORKSPACE" zizmor-audit
         STATUS=$?

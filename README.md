@@ -62,6 +62,7 @@ uploaded in that case, and `output-file` is left unset.
 | `version`           | The version of zizmor to use (e.g. `1.26.1`, with or without a `v` prefix), or `latest`.                   | `latest`                |
 | `color`             | Whether zizmor should output colorized CLI output.                                                         | `true`                  |
 | `fail-on-no-inputs` | Whether the action should fail if no inputs are collected by zizmor. Set `false` to succeed (with a warning) instead. | `true`                  |
+| `annotations`       | Also emit GitHub annotations for findings. When `advanced-security` resolves to enabled, zizmor runs a second time with `--format github` so annotations appear in the job log alongside the SARIF upload, and the job's pass/fail result is driven by that second run instead of the always-zero SARIF exit code. No effect when `advanced-security` resolves to disabled, since annotations are already the fallback output. | `false`                 |
 
 `config` accepts either form and detects which one you gave it: if the
 value spans multiple lines it's treated as inline YAML, otherwise it's
@@ -81,9 +82,9 @@ found, falling back to inline YAML otherwise.
 | ------------- | ----------------------------------------------------------------------------------------------- |
 | `output-file` | Absolute path (under the runner's temp directory) of the SARIF results. Only set when `advanced-security` is active. |
 
-## Not yet supported
+## Differences from the upstream action
 
-Compared to the upstream action, this first version omits `annotations`
-(the `github`-format fallback used when `advanced-security` resolves to
-disabled already emits annotations, but there's no standalone opt-in
-separate from `advanced-security`).
+Unlike the upstream action, `annotations` here is **not** mutually exclusive
+with `advanced-security`. Setting both to `true` runs zizmor twice - once
+for the SARIF upload, once for the annotations - so you get both outputs
+in the same job, at the cost of auditing the repository twice.
