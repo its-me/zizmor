@@ -1,37 +1,37 @@
-name: 'action.zizmor'
-description: 'Runs zizmor, a static analysis tool for finding security issues in GitHub Actions workflows.'
-author: 'Sergey Kanafyev'
+name: "zizmor - static analysis tool for Actions workflows"
+description: "Runs zizmor, a static analysis tool for finding security issues in GitHub Actions workflows"
+author: "Sergey Kanafyev"
 branding:
-  icon: 'shield'
-  color: 'green'
+  icon: "shield"
+  color: "green"
 
 inputs:
   inputs:
-    description: 'Whitespace-separated list of files or directories to audit.'
+    description: "Whitespace-separated list of files or directories to audit."
     required: false
-    default: '.'
+    default: "."
   online-audits:
     description: 'Enable online (network-backed) audits. Set to "false" to run fully offline.'
     required: false
-    default: 'true'
+    default: "true"
   persona:
-    description: 'Audit strictness level: regular, pedantic, or auditor.'
+    description: "Audit strictness level: regular, pedantic, or auditor."
     required: false
-    default: 'regular'
+    default: "regular"
   min-severity:
-    description: 'Minimum severity to report (unknown, informational, low, medium, high).'
+    description: "Minimum severity to report (unknown, informational, low, medium, high)."
     required: false
-    default: ''
+    default: ""
   min-confidence:
-    description: 'Minimum confidence to report (unknown, low, medium, high).'
+    description: "Minimum confidence to report (unknown, low, medium, high)."
     required: false
-    default: ''
+    default: ""
   version:
     description: 'The version of zizmor to use, e.g. "1.26.1", or "latest".'
     required: false
-    default: 'latest'
+    default: "latest"
   token:
-    description: 'GitHub token used to authenticate online audits.'
+    description: "GitHub token used to authenticate online audits."
     required: false
     default: ${{ github.token }}
   advanced-security:
@@ -40,7 +40,7 @@ inputs:
       "true", "false", or "auto" (upload only if code scanning is enabled
       for the repository).
     required: false
-    default: 'auto'
+    default: "auto"
   annotations:
     description: >
       Whether to also emit GitHub annotations for findings. If
@@ -51,29 +51,29 @@ inputs:
       "advanced-security" resolves to disabled, this has no effect, since
       annotations are already the fallback output in that case.
     required: false
-    default: 'false'
+    default: "false"
   color:
-    description: 'Whether zizmor should output colorized CLI output.'
+    description: "Whether zizmor should output colorized CLI output."
     required: false
-    default: 'true'
+    default: "true"
   config:
-    description: 'Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly.'
+    description: "Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly."
     required: false
-    default: ''
+    default: ""
   fail-on-no-inputs:
     description: >
       Whether the action should fail if no inputs are collected by zizmor.
       Set to "false" to succeed (with a warning) instead.
     required: false
-    default: 'true'
+    default: "true"
 
 outputs:
   output-file:
-    description: 'Absolute path (under the runner temp directory) of the generated SARIF results file.'
+    description: "Absolute path (under the runner temp directory) of the generated SARIF results file."
     value: ${{ steps.zizmor.outputs.output-file }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - id: advanced-security
       shell: sh
