@@ -1,9 +1,9 @@
 name: 'zizmor'
-description: 'Static analysis for GitHub Actions security issues, powered by zizmor.'
+description: 'Runs zizmor, a static analysis tool for finding security issues in GitHub Actions workflows.'
 author: 'Sergey Kanafyev'
 branding:
   icon: 'shield'
-  color: 'yellow'
+  color: 'green'
 
 inputs:
   inputs:
@@ -26,14 +26,14 @@ inputs:
     description: 'Minimum confidence to report (unknown, low, medium, high).'
     required: false
     default: ''
+  version:
+    description: 'The version of zizmor to use, e.g. "1.26.1", or "latest".'
+    required: false
+    default: 'latest'
   token:
     description: 'GitHub token used to authenticate online audits.'
     required: false
     default: ${{ github.token }}
-  config:
-    description: 'Inline zizmor configuration (YAML) to apply.'
-    required: false
-    default: ''
   advanced-security:
     description: >
       Upload results to GitHub Advanced Security (code scanning). One of
@@ -41,20 +41,6 @@ inputs:
       for the repository).
     required: false
     default: 'auto'
-  version:
-    description: 'The version of zizmor to use, e.g. "1.26.1", or "latest".'
-    required: false
-    default: 'latest'
-  color:
-    description: 'Whether zizmor should output colorized CLI output.'
-    required: false
-    default: 'true'
-  fail-on-no-inputs:
-    description: >
-      Whether the action should fail if no inputs are collected by zizmor.
-      Set to "false" to succeed (with a warning) instead.
-    required: false
-    default: 'true'
   annotations:
     description: >
       Whether to also emit GitHub annotations for findings. If
@@ -66,10 +52,24 @@ inputs:
       annotations are already the fallback output in that case.
     required: false
     default: 'false'
+  color:
+    description: 'Whether zizmor should output colorized CLI output.'
+    required: false
+    default: 'true'
+  config:
+    description: 'Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly.'
+    required: false
+    default: ''
+  fail-on-no-inputs:
+    description: >
+      Whether the action should fail if no inputs are collected by zizmor.
+      Set to "false" to succeed (with a warning) instead.
+    required: false
+    default: 'true'
 
 outputs:
   output-file:
-    description: 'Path (relative to the workspace) of the generated SARIF results file.'
+    description: 'Absolute path (under the runner temp directory) of the generated SARIF results file.'
     value: ${{ steps.zizmor.outputs.output-file }}
 
 runs:
