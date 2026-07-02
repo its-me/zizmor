@@ -70,7 +70,7 @@ found, falling back to inline YAML otherwise.
 
 | Name          | Description                                                                                   |
 | ------------- | ----------------------------------------------------------------------------------------------- |
-| `output-file` | Path (relative to the workspace) of the SARIF results. Only set when `advanced-security` is active. |
+| `output-file` | Absolute path (under the runner's temp directory) of the SARIF results. Only set when `advanced-security` is active. |
 
 ## Not yet supported
 

@@ -61,22 +61,21 @@ if [ "$FORMAT" != "sarif" ]; then
   exit $?
 fi
 
-SARIF_NAME="zizmor.sarif"
-SARIF_PATH="${WORKDIR}/${SARIF_NAME}"
+SARIF_PATH="${RUNNER_TEMP:-/tmp}/zizmor.sarif"
 
 zizmor "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
 
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "output-file=${SARIF_NAME}" >> "$GITHUB_OUTPUT"
+  echo "output-file=${SARIF_PATH}" >> "$GITHUB_OUTPUT"
 fi
 
 # --format sarif always exits 0, so count findings in the SARIF itself.
 FINDINGS=$(grep -c '"ruleId"' "$SARIF_PATH" || true)
 
 if [ "$FINDINGS" -eq 0 ]; then
-  echo "zizmor completed with no findings. SARIF written to ${SARIF_NAME}."
+  echo "zizmor completed with no findings. SARIF written to ${SARIF_PATH}."
   exit 0
 fi
 
-echo "zizmor found ${FINDINGS} finding(s). SARIF written to ${SARIF_NAME}."
+echo "zizmor found ${FINDINGS} finding(s). SARIF written to ${SARIF_PATH}."
 exit 1
