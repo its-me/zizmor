@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: its-me/zizmor@main
+      - uses: its-me/action.zizmor@main
 ```
 
 When `advanced-security` resolves to enabled (see below), results are

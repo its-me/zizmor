@@ -69,7 +69,8 @@ if [ "$FORMAT" = "sarif" ]; then
 
   # --format sarif always exits 0 on findings by design: results are meant to
   # surface via GitHub code scanning rather than fail the build.
-  zizmor --format sarif "$@" $TARGETS > "$SARIF_PATH" # shellcheck disable=SC2086
+  # shellcheck disable=SC2086
+  zizmor --format sarif "$@" $TARGETS > "$SARIF_PATH"
   SARIF_STATUS=$?
 
   if [ -n "${GITHUB_OUTPUT:-}" ]; then
@@ -84,7 +85,8 @@ if [ "$FORMAT" = "sarif" ]; then
     echo "zizmor --format github $* $TARGETS"
     echo "::endgroup::"
 
-    zizmor --format github "$@" $TARGETS # shellcheck disable=SC2086
+    # shellcheck disable=SC2086
+    zizmor --format github "$@" $TARGETS
     STATUS=$?
   else
     STATUS=$SARIF_STATUS
@@ -95,7 +97,8 @@ else
   echo "::endgroup::"
 
   # Non-sarif formats exit non-zero on findings, so just stream and propagate.
-  zizmor --format "$FORMAT" "$@" $TARGETS # shellcheck disable=SC2086
+  # shellcheck disable=SC2086
+  zizmor --format "$FORMAT" "$@" $TARGETS
   STATUS=$?
 fi
 
