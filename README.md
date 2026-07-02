@@ -1,4 +1,4 @@
-# zizmor-action
+# action.zizmor
 
 A GitHub Action that runs [zizmor](https://github.com/zizmorcore/zizmor), a
 static analysis tool for finding security issues in GitHub Actions workflows.
@@ -56,13 +56,13 @@ uploaded in that case, and `output-file` is left unset.
 | `persona`           | Audit strictness: `regular`, `pedantic`, or `auditor`.                                                     | `regular`               |
 | `min-severity`      | Minimum severity to report (`unknown`…`high`).                                                             | _(unset)_              |
 | `min-confidence`    | Minimum confidence to report (`unknown`…`high`).                                                           | _(unset)_              |
-| `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
-| `config`            | Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly.                     | _(unset)_               |
-| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if code scanning is enabled for the repository). | `auto`                  |
 | `version`           | The version of zizmor to use (e.g. `1.26.1`, with or without a `v` prefix), or `latest`.                   | `latest`                |
-| `color`             | Whether zizmor should output colorized CLI output.                                                         | `true`                  |
-| `fail-on-no-inputs` | Whether the action should fail if no inputs are collected by zizmor. Set `false` to succeed (with a warning) instead. | `true`                  |
+| `token`             | GitHub token used to authenticate online audits.                                                           | `${{ github.token }}`  |
+| `advanced-security` | Upload results to GitHub Advanced Security (code scanning): `true`, `false`, or `auto` (upload only if code scanning is enabled for the repository). | `auto`                  |
 | `annotations`       | Also emit GitHub annotations for findings. When `advanced-security` resolves to enabled, zizmor runs a second time with `--format github` so annotations appear in the job log alongside the SARIF upload, and the job's pass/fail result is driven by that second run instead of the always-zero SARIF exit code. No effect when `advanced-security` resolves to disabled, since annotations are already the fallback output. | `false`                 |
+| `color`             | Whether zizmor should output colorized CLI output.                                                         | `true`                  |
+| `config`            | Path to a zizmor config file, or inline zizmor configuration (YAML) to apply directly.                     | _(unset)_               |
+| `fail-on-no-inputs` | Whether the action should fail if no inputs are collected by zizmor. Set `false` to succeed (with a warning) instead. | `true`                  |
 
 `config` accepts either form and detects which one you gave it: if the
 value spans multiple lines it's treated as inline YAML, otherwise it's
