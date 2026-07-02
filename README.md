@@ -82,9 +82,24 @@ found, falling back to inline YAML otherwise.
 | ------------- | ----------------------------------------------------------------------------------------------- |
 | `output-file` | Absolute path (under the runner's temp directory) of the SARIF results. Only set when `advanced-security` is active. |
 
-## Differences from the upstream action
+## Improvements over the upstream action
 
-Unlike the upstream action, `annotations` here is **not** mutually exclusive
-with `advanced-security`. Setting both to `true` runs zizmor twice - once
-for the SARIF upload, once for the annotations - so you get both outputs
-in the same job, at the cost of auditing the repository twice.
+Compared to the upstream `zizmor-action`, this action adds:
+
+- **A custom container image** (`ghcr.io/its-me/zizmor`), built specifically
+  for this action. It's about a third smaller than the official image
+  (~38 MB vs ~57 MB, Alpine-based rather than Wolfi-based) while running
+  the exact same `zizmor` binary and version underneath, so pulls and
+  builds are faster with no change in audit behavior.
+- **`advanced-security: auto`**, which detects whether GitHub code
+  scanning is actually available for the repository (via the
+  code-scanning API) instead of requiring you to hardcode `true` or
+  `false` per repository.
+- **Combinable `annotations` and `advanced-security`**: upstream treats
+  these as mutually exclusive and refuses to run if both are `true`.
+  Here, enabling both runs zizmor twice - once for the SARIF upload, once
+  more with `--format github` - so you get a persistent Security-tab
+  record *and* a build that fails on findings, in the same job (at the
+  cost of auditing the repository twice).
+- **A single `config` input that accepts both a file path and inline
+  YAML**, auto-detected, instead of requiring a path only.
