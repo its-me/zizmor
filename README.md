@@ -56,15 +56,18 @@ uploaded in that case, and `output-file` is left unset.
 
 [ruleset]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#set-code-scanning-merge-protection
 
-### Disable a specific rule
+### Disable specific rules and enable annotations
 
 This workflow passes inline YAML via `config` to disable the
-`unpinned-uses` rule, the same configuration this repository's own CI
-uses (see [`ci.yaml`](.github/workflows/ci.yaml)) since it intentionally
-references itself via a local path rather than a pinned `uses:` ref:
+`artipacked` and `unpinned-uses` rules, instead of pinning `uses:` refs
+or setting `persist-credentials: false` as shown in
+[`ci.yaml`](.github/workflows/ci.yaml) - useful if you'd rather suppress
+a finding than change the step that triggers it. It also sets
+`annotations: true` so findings show up inline in the job log alongside
+the SARIF upload:
 
 ```yaml
-name: zizmor
+name: zizmor (custom config)
 
 on:
   push:
@@ -82,12 +85,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
       - uses: its-me/action.zizmor@v1
         with:
+          annotations: true
           config: |
             rules:
+              artipacked:
+                disable: true
               unpinned-uses:
                 disable: true
 ```
